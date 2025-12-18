@@ -121,6 +121,20 @@ describe('ROM Header Detection', () => {
         expect(errorMsg).toContain('Hex dump');
       }
     });
+
+    it('should accept ROM with extended validation string', () => {
+      const rom = new Uint8Array(ROM_SIZE);
+      // Write extended validation string (like development builds)
+      const extendedString = 'DIDDY ASSEMBLY DATE & TIME 08/11/95 @ 17:06';
+      const extendedBytes = new TextEncoder().encode(extendedString);
+      for (let i = 0; i < extendedBytes.length; i++) {
+        rom[VALIDATION_OFFSET + i] = extendedBytes[i];
+      }
+
+      // Should not throw - extended strings are valid
+      const cart = new CartFile(rom);
+      expect(cart.isValid()).toBe(true);
+    });
   });
 
   describe('Console logging', () => {

@@ -291,11 +291,11 @@ export class CartFile extends RomBuffer {
     }
 
     // Check for validation string at standard offset
-    console.log(`Checking for validation string "${VALIDATION_STRING}" at offset 0x${VALIDATION_OFFSET.toString(16)}...`);
+    console.log(`Checking for validation string starting with "${VALIDATION_STRING}" at offset 0x${VALIDATION_OFFSET.toString(16)}...`);
     const validationStr = this.readString(VALIDATION_OFFSET);
     console.log(`Found string: "${validationStr}"`);
 
-    if (validationStr !== VALIDATION_STRING) {
+    if (!validationStr.startsWith(VALIDATION_STRING)) {
       // Try reading some bytes around the validation offset to help debug
       const debugBytes: number[] = [];
       for (let i = 0; i < 32 && VALIDATION_OFFSET + i < this.getDataSize(); i++) {
@@ -308,8 +308,8 @@ export class CartFile extends RomBuffer {
       const errorMsg = [
         `Invalid DKC2 ROM: Validation string not found`,
         ``,
-        `Expected: "${VALIDATION_STRING}" at offset 0x${VALIDATION_OFFSET.toString(16)}`,
-        `Found: "${validationStr}"`,
+        `Expected string starting with: "${VALIDATION_STRING}" at offset 0x${VALIDATION_OFFSET.toString(16)}`,
+        `Found: "${validationStr.substring(0, 50)}${validationStr.length > 50 ? '...' : ''}"`,
         ``,
         `Hex dump at validation offset:`,
         `  ${debugHex}`,
@@ -321,6 +321,12 @@ export class CartFile extends RomBuffer {
 
       console.error(errorMsg);
       throw new Error(errorMsg);
+    }
+
+    // Log the full validation string found (for informational purposes)
+    if (validationStr !== VALIDATION_STRING) {
+      console.log(`ℹ ROM contains extended validation string: "${validationStr}"`);
+      console.log('This appears to be a development or alternative build of DKC2.');
     }
 
     console.log('✓ ROM validation successful!');
