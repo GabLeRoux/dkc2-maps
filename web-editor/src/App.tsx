@@ -2,7 +2,7 @@
  * Main Application Component
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CartFile } from '@/core/rom-file';
 import { RomUploader } from '@/components/RomUploader';
 import { LevelEditor } from '@/components/LevelEditor';
@@ -10,7 +10,6 @@ import { LevelEditor } from '@/components/LevelEditor';
 function App() {
   const [romFile, setRomFile] = useState<CartFile | null>(null);
   const [selectedLevel, setSelectedLevel] = useState(0);
-  const [showLevelList, setShowLevelList] = useState(false);
 
   // DKC2 level names (from level_name.cpp)
   const levelNames = [
@@ -35,7 +34,6 @@ function App() {
 
   const handleLevelSelect = (levelId: number) => {
     setSelectedLevel(levelId);
-    setShowLevelList(false);
   };
 
   if (!romFile) {

@@ -130,7 +130,7 @@ describe('Rare LZ77 Decompression', () => {
       ]);
 
       const buffer = new RomBuffer(compressedData);
-      const result = rareDecompress(buffer);
+      rareDecompress(buffer);
 
       // Should either handle it or return null gracefully
       // Depending on implementation

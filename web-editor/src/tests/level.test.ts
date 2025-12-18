@@ -1,5 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { CartFile } from '@/core/rom-file';
+import { describe, it, expect } from 'vitest';
 import { decodeSnesTile, create32x32Tile } from '@/core/level';
 import { Palette } from '@/types';
 

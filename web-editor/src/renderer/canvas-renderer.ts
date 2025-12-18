@@ -3,7 +3,7 @@
  * Replaces GDI rendering from C++ with Canvas API
  */
 
-import { TileMap, LevelSprite, Palette } from '@/types';
+import { TileMap, LevelSprite } from '@/types';
 
 export class CanvasRenderer {
   private canvas: HTMLCanvasElement;

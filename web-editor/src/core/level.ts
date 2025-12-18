@@ -168,10 +168,6 @@ export function loadTilemap(
   const tilemapTypeAddr = ROM_ADDRESSES.TILEMAP_TYPE_FLAGS + style.mapId * 2;
   const tilemapType = cart.readWordAt(CartFile.hiromToFile(tilemapTypeAddr));
 
-  // Get tilemap data pointer
-  const tilemapPtrAddr = ROM_ADDRESSES.TILEMAP_DATA_POINTERS + style.mapId * 4;
-  const tilemapAddr = cart.readDwordAt(CartFile.hiromToFile(tilemapPtrAddr));
-
   // Get tilemap address from table
   const tilemapTableAddr = ROM_ADDRESSES.TILEMAP_ADDRESS_TABLE + properties.mapIndex * 4;
   const actualTilemapAddr = cart.readDwordAt(CartFile.hiromToFile(tilemapTableAddr));

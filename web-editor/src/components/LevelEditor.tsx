@@ -2,16 +2,13 @@
  * Main Level Editor Component
  */
 
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { CartFile } from '@/core/rom-file';
 import {
   loadLevelProperties,
   loadLevelStyle,
-  loadPalette,
-  loadTileGraphics,
   loadTilemap,
   loadLevelSprites,
-  decodeSnesTile,
 } from '@/core/level';
 import { CanvasRenderer } from '@/renderer/canvas-renderer';
 import { TileMap, LevelSprite, LevelProperties, LevelStyle } from '@/types';

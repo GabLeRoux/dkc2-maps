@@ -278,6 +278,7 @@ export class CartFile extends RomBuffer {
    * Export ROM data as Blob for download
    */
   exportAsBlob(): Blob {
-    return new Blob([this.export()], { type: 'application/octet-stream' });
+    const data = this.export();
+    return new Blob([data.buffer as ArrayBuffer], { type: 'application/octet-stream' });
   }
 }

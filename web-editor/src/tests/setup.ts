@@ -1,10 +1,10 @@
-import { expect, afterEach } from 'vitest';
+import { afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Polyfill ImageData for Node.js test environment
 if (typeof ImageData === 'undefined') {
-  global.ImageData = class ImageData {
+  (globalThis as any).ImageData = class ImageData {
     width: number;
     height: number;
     data: Uint8ClampedArray;
