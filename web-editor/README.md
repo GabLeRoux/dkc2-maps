@@ -104,6 +104,61 @@ The project includes comprehensive tests for:
 
 Run `npm test` to execute all tests.
 
+## Deployment
+
+### Deploy to Netlify
+
+This project is configured for easy deployment to Netlify.
+
+#### Option 1: One-Click Deploy
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/GabLeRoux/dkc2-maps)
+
+#### Option 2: Manual Deploy
+
+1. **Connect your repository** to Netlify
+2. **Configure build settings**:
+   - Build command: `npm install && npm run build`
+   - Publish directory: `web-editor/dist`
+   - Base directory: `web-editor`
+3. **Deploy** - Netlify will automatically build and deploy your site
+
+The `netlify.toml` configuration file is already set up with:
+- SPA routing redirects
+- Security headers (CSP, X-Frame-Options, etc.)
+- Asset caching strategies
+- Build optimizations
+
+#### Option 3: Netlify CLI
+
+```bash
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Login to Netlify
+netlify login
+
+# Deploy
+cd web-editor
+netlify deploy --prod
+```
+
+### Other Hosting Options
+
+The built static files in `dist/` can be deployed to any static hosting service:
+
+- **Vercel**: `vercel --prod`
+- **GitHub Pages**: Deploy the `dist/` folder
+- **Cloudflare Pages**: Connect repository and set build command
+- **AWS S3**: Upload `dist/` contents to S3 bucket
+
+## Performance
+
+- **Bundle Size**: Optimized with Vite's tree-shaking and code splitting
+- **Caching**: Static assets cached for 1 year, HTML revalidated on every request
+- **Compression**: Gzip/Brotli enabled automatically by Netlify
+- **Browser-Only**: No server required, all processing happens client-side
+
 ## License
 
 MIT License (same as original project)
