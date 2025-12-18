@@ -185,8 +185,18 @@ export class CartFile extends RomBuffer {
    * Load ROM from File object (browser file upload)
    */
   static async fromFile(file: File): Promise<CartFile> {
+    console.log(`Loading ROM file: ${file.name} (${file.size} bytes)`);
     const arrayBuffer = await file.arrayBuffer();
-    const data = new Uint8Array(arrayBuffer);
+    let data = new Uint8Array(arrayBuffer);
+
+    // Detect and strip 512-byte header if present
+    const hasHeader = CartFile.detectHeader(data);
+    if (hasHeader) {
+      console.log('Detected 512-byte SNES ROM header, stripping it...');
+      data = data.slice(512);
+      console.log(`ROM size after header removal: ${data.length} bytes`);
+    }
+
     return new CartFile(data);
   }
 
@@ -194,8 +204,51 @@ export class CartFile extends RomBuffer {
    * Load ROM from ArrayBuffer
    */
   static fromArrayBuffer(arrayBuffer: ArrayBuffer): CartFile {
-    const data = new Uint8Array(arrayBuffer);
+    let data = new Uint8Array(arrayBuffer);
+
+    // Detect and strip 512-byte header if present
+    const hasHeader = CartFile.detectHeader(data);
+    if (hasHeader) {
+      console.log('Detected 512-byte SNES ROM header, stripping it...');
+      data = data.slice(512);
+    }
+
     return new CartFile(data);
+  }
+
+  /**
+   * Detect if ROM has a 512-byte header (.smc format)
+   * SNES ROMs can be either:
+   * - Headerless (.sfc): exactly 4MB (0x400000 bytes)
+   * - Headered (.smc): 4MB + 512 bytes (0x400200 bytes)
+   */
+  private static detectHeader(data: Uint8Array): boolean {
+    const size = data.length;
+    const HEADER_SIZE = 512;
+    const ROM_SIZE_WITH_HEADER = ROM_SIZE + HEADER_SIZE;
+
+    console.log(`ROM file size: ${size} bytes (0x${size.toString(16)})`);
+
+    // If size matches exactly 4MB + 512 bytes, it has a header
+    if (size === ROM_SIZE_WITH_HEADER) {
+      console.log('ROM size matches 4MB + 512 bytes (.smc format)');
+      return true;
+    }
+
+    // If size is exactly 4MB, no header
+    if (size === ROM_SIZE) {
+      console.log('ROM size matches exactly 4MB (.sfc format)');
+      return false;
+    }
+
+    // If size is close to 4MB but not exact, check if adding/removing header helps
+    if (size > ROM_SIZE && size < ROM_SIZE_WITH_HEADER + 1024) {
+      console.log('ROM size is close to 4MB + 512, assuming headered format');
+      return true;
+    }
+
+    console.log('ROM size does not match standard formats');
+    return false;
   }
 
   /**
@@ -203,21 +256,74 @@ export class CartFile extends RomBuffer {
    * Checks for "DIDDY ASSEMBLY" string at offset 0x3F0000
    */
   private validate(): void {
-    // Check file size
-    if (this.getDataSize() !== ROM_SIZE) {
-      throw new Error(
-        `Invalid ROM size: expected ${ROM_SIZE} bytes (4MB HiROM), got ${this.getDataSize()} bytes`
-      );
+    console.log('Validating DKC2 ROM...');
+
+    // Check file size with tolerance
+    const actualSize = this.getDataSize();
+    const sizeDiff = actualSize - ROM_SIZE;
+
+    console.log(`Expected size: ${ROM_SIZE} bytes (0x${ROM_SIZE.toString(16)})`);
+    console.log(`Actual size: ${actualSize} bytes (0x${actualSize.toString(16)})`);
+    console.log(`Size difference: ${sizeDiff} bytes`);
+
+    if (actualSize !== ROM_SIZE) {
+      // Check if it's close enough (within 1KB tolerance for slight variations)
+      if (Math.abs(sizeDiff) > 1024) {
+        const errorMsg = [
+          `Invalid ROM size detected:`,
+          `  Expected: ${ROM_SIZE} bytes (4MB HiROM)`,
+          `  Got: ${actualSize} bytes (${(actualSize / 1024 / 1024).toFixed(2)}MB)`,
+          `  Difference: ${sizeDiff > 0 ? '+' : ''}${sizeDiff} bytes`,
+          ``,
+          `Supported formats:`,
+          `  - Headerless (.sfc): exactly 4,194,304 bytes`,
+          `  - Headered (.smc): 4,194,816 bytes (4MB + 512-byte header)`,
+          ``,
+          `Your ROM file appears to be non-standard.`,
+          `Please ensure you have a valid DKC2 SNES ROM dump.`,
+        ].join('\n');
+
+        console.error(errorMsg);
+        throw new Error(errorMsg);
+      } else {
+        console.warn(`ROM size is slightly off (${sizeDiff} bytes), but within tolerance. Continuing...`);
+      }
     }
 
-    // Check for validation string
+    // Check for validation string at standard offset
+    console.log(`Checking for validation string "${VALIDATION_STRING}" at offset 0x${VALIDATION_OFFSET.toString(16)}...`);
     const validationStr = this.readString(VALIDATION_OFFSET);
+    console.log(`Found string: "${validationStr}"`);
+
     if (validationStr !== VALIDATION_STRING) {
-      throw new Error(
-        `Invalid ROM: validation string not found at offset 0x${VALIDATION_OFFSET.toString(16)}`
-      );
+      // Try reading some bytes around the validation offset to help debug
+      const debugBytes: number[] = [];
+      for (let i = 0; i < 32 && VALIDATION_OFFSET + i < this.getDataSize(); i++) {
+        debugBytes.push(this.readByteAt(VALIDATION_OFFSET + i));
+      }
+
+      const debugHex = debugBytes.map(b => b.toString(16).padStart(2, '0')).join(' ');
+      const debugAscii = debugBytes.map(b => (b >= 32 && b < 127) ? String.fromCharCode(b) : '.').join('');
+
+      const errorMsg = [
+        `Invalid DKC2 ROM: Validation string not found`,
+        ``,
+        `Expected: "${VALIDATION_STRING}" at offset 0x${VALIDATION_OFFSET.toString(16)}`,
+        `Found: "${validationStr}"`,
+        ``,
+        `Hex dump at validation offset:`,
+        `  ${debugHex}`,
+        `  ${debugAscii}`,
+        ``,
+        `This may not be a valid DKC2 ROM file, or it may be from a different`,
+        `version/region. The editor currently only supports the standard release.`,
+      ].join('\n');
+
+      console.error(errorMsg);
+      throw new Error(errorMsg);
     }
 
+    console.log('✓ ROM validation successful!');
     this.valid = true;
   }
 

@@ -2,7 +2,7 @@
  * ROM File Uploader Component
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CartFile } from '@/core/rom-file';
 
 interface RomUploaderProps {
@@ -83,14 +83,25 @@ export const RomUploader: React.FC<RomUploaderProps> = ({ onRomLoaded }) => {
               )}
             </p>
             <p className="mt-2 text-xs text-gray-500">
-              SNES ROM file (.sfc, .smc) - 4MB HiROM
+              SNES ROM file (.sfc, .smc)
+              <br />
+              Supports both headerless and headered formats
             </p>
           </label>
         </div>
 
         {error && (
           <div className="mt-4 p-4 bg-red-900 bg-opacity-50 border border-red-500 rounded text-red-200 text-sm">
-            {error}
+            <pre className="whitespace-pre-wrap font-mono text-xs">{error}</pre>
+            <details className="mt-2 text-xs text-gray-300">
+              <summary className="cursor-pointer hover:text-white">
+                Check browser console for detailed logs
+              </summary>
+              <p className="mt-2">
+                Open your browser's developer console (F12) to see detailed
+                validation logs and debug information.
+              </p>
+            </details>
           </div>
         )}
 

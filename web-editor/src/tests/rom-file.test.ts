@@ -170,7 +170,7 @@ describe('CartFile', () => {
 
     it('should reject ROM without validation string', () => {
       const invalidRom = new Uint8Array(ROM_SIZE);
-      expect(() => new CartFile(invalidRom)).toThrow('validation string not found');
+      expect(() => new CartFile(invalidRom)).toThrow('Validation string not found');
     });
   });
 
